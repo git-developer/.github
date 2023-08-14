@@ -11,7 +11,8 @@ on:
         type: string
 
 jobs:
-  build-multi-platform-for-dockerhub:
+  build-dockerhub:
+    name: Build and Publish to DockerHub
     uses: ./.github/workflows/build-multi-platform.yml
     with:
       registry:       docker.io

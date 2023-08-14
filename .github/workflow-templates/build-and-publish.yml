@@ -18,6 +18,7 @@ on:
 
 jobs:
   build-ghcr:
+    name: Build and Publish to GHCR
     if: inputs.registry == 'GitHub Container Registry'
     permissions:
       packages: write
@@ -27,6 +28,7 @@ jobs:
       build-args:     ${{ inputs.build-args }}
 
   build-dockerhub:
+    name: Build and Publish to DockerHub
     if: inputs.registry == 'Docker Hub'
     uses: ./.github/workflows/build-dockerhub.yml
     with:

@@ -1,4 +1,4 @@
-name: Multi-Platform Build and Publish to GitHub COntainer Registry
+name: Multi-Platform Build and Publish to GitHub Container Registry
 
 on:
   workflow_call:
@@ -11,7 +11,8 @@ on:
         type: string
 
 jobs:
-  build-multi-platform-for-ghcr:
+  build-ghcr:
+    name: Build and Publish to GHCR
     permissions:
       packages: write
     uses: ./.github/workflows/build-multi-platform.yml

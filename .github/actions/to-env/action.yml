@@ -8,10 +8,10 @@ inputs:
     required: true
 outputs:
   result:
-    description: "JSON array of env-formatted properties"
+    description: 'JSON array of env-formatted properties'
     value: ${{ steps.transform.outputs.result }}
 runs:
-  using: "composite"
+  using: composite
   steps:
     - id: transform
       env:
