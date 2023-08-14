@@ -21,14 +21,14 @@ jobs:
     if: inputs.registry == 'GitHub Container Registry'
     permissions:
       packages: write
-    uses: .github/workflows/build-ghcr.yml
+    uses: ./.github/workflows/build-ghcr.yml
     with:
       platforms:      ${{ inputs.platforms }}
       build-args:     ${{ inputs.build-args }}
 
   build-dockerhub:
     if: inputs.registry == 'Docker Hub'
-    uses: .github/workflows/build-dockerhub.yml
+    uses: ./.github/workflows/build-dockerhub.yml
     with:
       platforms:      ${{ inputs.platforms }}
       build-args:     ${{ inputs.build-args }}

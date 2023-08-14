@@ -1,4 +1,4 @@
-name: Multi-Platform Build and Publish to Docker Hub
+name: Multi-Platform Build and Publish to GitHub COntainer Registry
 
 on:
   workflow_call:
@@ -11,13 +11,15 @@ on:
         type: string
 
 jobs:
-  build-multi-platform-for-dockerhub:
-    uses: .github/workflows/build-multi-platform.yml
+  build-multi-platform-for-ghcr:
+    permissions:
+      packages: write
+    uses: ./.github/workflows/build-multi-platform.yml
     with:
-      registry:       docker.io
-      username:       ${{ vars.DOCKERHUB_USERNAME }}
-      registry-image: ${{ vars.DOCKERHUB_USERNAME }}/${{ github.event.repository.name }}
+      registry:       ghcr.io
+      username:       ${{ github.actor }}
+      registry-image: ghcr.io/${{ github.repository }}
       platforms:      ${{ inputs.platforms }}
       build-args:     ${{ inputs.build-args }}
     secrets:
-      password:       ${{ secrets.DOCKERHUB_TOKEN }}
+      password:       ${{ secrets.GITHUB_TOKEN }}
