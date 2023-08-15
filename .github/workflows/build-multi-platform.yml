@@ -80,9 +80,10 @@ jobs:
           build-args: ${{ join(fromJSON(inputs.build-args), fromJSON('"\n"')) }}
       -
         name: Export digest
+        env:
+          digest: ${{ steps.build.outputs.digest }}
         run: |
           mkdir -p /tmp/digests
-          digest="${{ steps.build.outputs.digest }}"
           touch "/tmp/digests/${digest#sha256:}"
       -
         name: Upload digest
@@ -123,10 +124,17 @@ jobs:
       -
         name: Create manifest list and push
         working-directory: /tmp/digests
+        env:
+          image: ${{ inputs.registry-image }}
+          json: ${{ steps.meta.outputs.json }}
         run: |
-          docker buildx imagetools create $(jq -cr '.tags | map("-t " + .) | join(" ")' <<< "$DOCKER_METADATA_OUTPUT_JSON") \
-            $(printf '${{ inputs.registry-image }}@sha256:%s ' *)
+          docker buildx imagetools create \
+            $(echo "${json}" | jq -cr '.tags | map("-t " + .) | join(" ")') \
+            $(printf "${image}@sha256:%s " *)
       -
         name: Inspect image
+        env:
+          image: ${{ inputs.registry-image }}
+          version: ${{ steps.meta.outputs.version }}
         run: |
-          docker buildx imagetools inspect ${{ inputs.registry-image }}:${{ steps.meta.outputs.version }}
+          docker buildx imagetools inspect "${image}:${version}"
