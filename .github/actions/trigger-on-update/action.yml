@@ -4,8 +4,6 @@ runs:
   using: composite
   steps:
     - name: Run shell script
-      permissions:
-        actions: write
       env:
         CI_PROJECT_PATH:    ${{ github.repository }}
         CI_COMMIT_REF_NAME: ${{ github.ref_name }}
