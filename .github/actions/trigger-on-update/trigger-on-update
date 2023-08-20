@@ -31,8 +31,7 @@ prepare_dependencies() {
     echo "${dependencies}" | tr ' ' $'\n' | while read -r dep; do
       dpkg -l "${dep}" | grep -q "^ii\s*${dep}"
     done || {
-      apt-get update
-      echo "${dependencies}" | xargs apt-get install -y
+      sudo sh -c "apt-get update && echo '${dependencies}' | xargs apt-get install -y"
     }
   fi
 }
