@@ -161,7 +161,7 @@ trigger() {
     curl -sSL \
          --header "Authorization: Bearer ${GITHUB_TOKEN}" \
          --header 'Accept: application/vnd.github+json' \
-         --header 'X-GitHub-Api-Version: 2022-11-28'
+         --header 'X-GitHub-Api-Version: 2022-11-28' \
          --data "$(jq -c -n --arg ref "${DOWNSTREAM_REF}" '{ref: $ref}')" \
          "${downstream_project_url}/actions/workflows/${workflow_id}/dispatches"
   else
