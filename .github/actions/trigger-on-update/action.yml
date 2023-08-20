@@ -8,7 +8,6 @@ runs:
         CI_PROJECT_PATH:    ${{ github.repository }}
         CI_COMMIT_REF_NAME: ${{ github.ref_name }}
         CI_REPOSITORY_URL:  ${{ github.repositoryUrl }}
-        GITHUB_TOKEN:       ${{ secrets.GITHUB_TOKEN }}
       working-directory: ${{ github.action_path }}
       run: "./trigger-on-update"
       shell: bash
