@@ -159,6 +159,7 @@ trigger() {
   elif [ "${GITHUB_API_URL-}" ]; then
     downstream_project_url="${GITHUB_API_URL}/repos/${DOWNSTREAM_PROJECT}"
     workflow_id="${DOWNSTREAM_WORKFLOW_ID:-main.yml}"
+    set -x
     curl -sSL --fail-with-body \
          --header "Authorization: Bearer ${GITHUB_TOKEN}" \
          --header 'Accept: application/vnd.github+json' \
