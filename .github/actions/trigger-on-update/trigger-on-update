@@ -19,10 +19,21 @@ log() {
 ##
 prepare_dependencies() {
   dependencies='coreutils jq git curl'
+
   if command -V apk >/dev/null 2>&1; then
-    echo "${dependencies}" | xargs apk add --no-cache
+    echo "${dependencies}" | tr ' ' $'\n' | while read -r dep; do
+      apk info | grep -q "^${dep}$"
+    done || {
+      apk update
+      echo "${dependencies}" | xargs apk add --no-cache
+    }
   elif command -V apt-get >/dev/null 2>&1; then
-    apt-get update && echo "${dependencies}" | xargs apt-get install -y
+    echo "${dependencies}" | tr ' ' $'\n' | while read -r dep; do
+      dpkg -l "${dep}" | grep -q "^ii\s*${dep}"
+    done || {
+      apt-get update
+      echo "${dependencies}" | xargs apt-get install -y
+    }
   fi
 }
 
