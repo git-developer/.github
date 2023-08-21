@@ -2,11 +2,9 @@
 set -euo pipefail
 if [ "${TRACE-}" ]; then set -x; fi
 
+UPDATE_CHECK_URLS="${UPDATE_CHECK_URLS:-${CI_REPOSITORY_URL}}"
 IMAGE_NAME="${IMAGE_NAME:-${CI_PROJECT_PATH}}"
 IMAGE_VERSION="${IMAGE_VERSION:-latest}"
-DOWNSTREAM_PROJECT="${DOWNSTREAM_PROJECT:-${CI_PROJECT_PATH}}"
-DOWNSTREAM_REF="${DOWNSTREAM_REF:-${CI_COMMIT_REF_NAME}}"
-UPDATE_CHECK_URLS="${UPDATE_CHECK_URLS:-${CI_REPOSITORY_URL}}"
 REGISTRY_BASE_URL="${REGISTRY_BASE_URL:-https://index.docker.io}"
 REGISTRY_AUTH_BASE_URL="${REGISTRY_AUTH_BASE_URL:-https://auth.docker.io}"
 REGISTRY_AUTH_SERVICE="${REGISTRY_AUTH_SERVICE:-registry.docker.io}"
@@ -31,10 +29,7 @@ prepare_dependencies() {
   elif command -V apt-get >/dev/null 2>&1; then
     echo "${dependencies}" | tr ' ' $'\n' | while read -r dep; do
       dpkg -l "${dep}" | grep -q "^ii\s*${dep}"
-    done || {
-      apt-get update
-      echo "${dependencies}" | xargs apt-get install -y
-    }
+    done || sudo sh -c "apt-get update; echo '${dependencies}' | xargs apt-get install -y"
   fi
 }
 
@@ -148,53 +143,17 @@ find_latest() {
   fi
 }
 
-trigger() {
-  log "Image is outdated. Triggering build of project '${DOWNSTREAM_PROJECT}' with ref '${DOWNSTREAM_REF}'."
-  if  [ "${CI_API_V4_URL-}" ]; then
-    downstream_project_url="${CI_API_V4_URL}/projects/$(jq -nr --arg v "${DOWNSTREAM_PROJECT}" '$v|@uri')"
-    curl -sSL \
-         --fail-with-body \
-         --write-out "URL: %{url_effective}\n" \
-         --form "token=${CI_JOB_TOKEN}" \
-         --form "ref=${DOWNSTREAM_REF}" \
-         "${downstream_project_url}/trigger/pipeline"
-  elif [ "${GITHUB_API_URL-}" ]; then
-    downstream_project_url="${GITHUB_API_URL}/repos/${DOWNSTREAM_PROJECT}"
-    workflow_id="${DOWNSTREAM_WORKFLOW_ID:-main.yml}"
-    curl -sSL \
-         --fail-with-body \
-         --write-out "URL: %{url_effective}\n" \
-         --header "Authorization: Bearer ${GITHUB_TOKEN}" \
-         --header 'Accept: application/vnd.github+json' \
-         --header 'X-GitHub-Api-Version: 2022-11-28' \
-         --data "$(jq -c -n --arg ref "${DOWNSTREAM_REF}" '{ref: $ref}')" \
-         "${downstream_project_url}/actions/workflows/${workflow_id}/dispatches"
-  else
-    log "Skipping build: unsupported CI environment"
-    return 1
-  fi
-}
-
 ##
-# Check if an update is available. If so, trigger a build.
+# Check if an update is available.
 #
 # - The variable UPDATE_CHECK_URLS is used to check the application date;
 #   it may contain a space-separated list of URLs pointing to a HTTP
 #   resource or a git repository.
-# - If the image is outdated, a pipeline for $DOWNSTREAM_PROJECT on branch
-#   $DOWNSTREAM_REF is triggered. Project and branch default to the current
-#   environment, so that by default the current project is build.
 #
 # This job is designed for projects that download and build an application
-# hosted externally. To automatically build a project when the external
-# application is updated:
-#
-#  1. Create a CI rule to run this function if $PIPELINE_MODE == 'update-check'
-#  2. Create a schedule with an interval of your choice
-#     and set the variable PIPELINE_MODE to 'update-check'.
-#
+# hosted externally.
 ##
-trigger_on_update() {
+update_check() {
   echo "Image: ${IMAGE_NAME}:${IMAGE_VERSION}"
   last_modification="$(detect_last_modifications "${UPDATE_CHECK_URLS}" "${UPDATE_CHECK_REF-}" | find_latest)"
   image_date="$(detect_image_dates | find_latest)"
@@ -202,15 +161,15 @@ trigger_on_update() {
     log "An error occured while detecting dates."
     exit 1
   elif [ "${last_modification}" -le "${image_date}" ]; then
-    log "Image is up-to-date."
+    echo 'up-to-date'
   else
-    trigger
+    echo 'outdated'
   fi
 }
 
 main() {
   prepare_dependencies
-  trigger_on_update "${@}"
+  update_check "${@}"
 }
 
 main "${@}"
