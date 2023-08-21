@@ -4,7 +4,7 @@ inputs:
   repo-owner:
     default: ${{ github.repository_owner }}
   repo-name:
-    default: ${{ github.repository }}
+    default: ${{ github.event.repository.name }}
   workflow-id:
     default: 'main.yml'
   ref:
