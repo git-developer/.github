@@ -2,8 +2,11 @@ name: Trigger on Update
 description: 'Check if an update is available. If so, trigger a build.'
 inputs:
   update-check-urls:
+    description: 'Space-separated list of URLs for the update check'
   image-name:
+    description: 'Name of the container image for the update check, e.g. "octocat/Hello-World"'
   image-version:
+    description: 'Tag of the container image for the update check, e.g. "latest"'
   repo-owner:
     default: ${{ github.repository_owner }}
   repo-name:
