@@ -154,7 +154,7 @@ find_latest() {
 # hosted externally.
 ##
 update_check() {
-  echo "Image: ${IMAGE_NAME}:${IMAGE_VERSION}"
+  log "Image: ${IMAGE_NAME}:${IMAGE_VERSION}"
   last_modification="$(detect_last_modifications "${UPDATE_CHECK_URLS}" "${UPDATE_CHECK_REF-}" | find_latest)"
   image_date="$(detect_image_dates | find_latest)"
   if [ -z "${last_modification-}" ] || [ -z "${image_date-}" ]; then
