@@ -1,6 +1,9 @@
 name: Trigger on Update
 description: 'Check if an update is available. If so, trigger a build.'
 inputs:
+  update-check-urls:
+  image-name:
+  image-version:
   repo-owner:
     default: ${{ github.repository_owner }}
   repo-name:
@@ -19,6 +22,9 @@ runs:
         CI_PROJECT_PATH:    ${{ github.repository }}
         CI_COMMIT_REF_NAME: ${{ github.ref_name }}
         CI_REPOSITORY_URL:  ${{ github.repositoryUrl }}
+        UPDATE_CHECK_URLS:  ${{ inputs.update-check-urls }}
+        IMAGE_NAME:         ${{ inputs.image-name }}
+        IMAGE_VERSION:      ${{ inputs.image-version }}
       working-directory: ${{ github.action_path }}
       run: echo "result=$(./update-check)" >>"${GITHUB_OUTPUT}"
     - uses: actions/github-script@v6
