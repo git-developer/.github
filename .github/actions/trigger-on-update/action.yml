@@ -8,7 +8,7 @@ inputs:
   workflow-id:
     default: 'main.yml'
   ref:
-    default: 'main'
+    default: ${{ github.ref_name }}
 
 runs:
   using: composite
